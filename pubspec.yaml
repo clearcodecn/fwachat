@@ -22,9 +22,13 @@ dependencies:
   path_provider: ^1.2.0
   xml: ^4.3.0
 
+  json_annotation: ^3.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  json_serializable: ^3.3.0 # json generate
+  build_runner: ^1.10.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

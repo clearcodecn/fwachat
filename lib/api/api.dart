@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'login.dart';
 import 'package:xml/xml.dart';
+import 'package:fwachat/model/wxkey.dart';
 
 class Api {
   static const _baseURL = "https://login.weixin.qq.com";
@@ -49,7 +50,7 @@ class Api {
       param["loginicon"] = true;
       param["r"] = DateTime.now().microsecond;
 
-      var header = Map();
+      Map<String, dynamic> header = Map();
       header["User-Agent"] =
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36";
 
@@ -65,7 +66,6 @@ class Api {
 			 * window.redirect_uri="https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=AQuJ8eKao4A-oP242PEm6AWn@qrticket_0&uuid=wf5b7Sbikg==&lang=zh_CN&scan=1596182824";
 			 */
       String resp = response.data;
-      print(resp);
       bool hasRedirectURL = resp.contains("http");
       String redirectURL;
       String code;
@@ -88,9 +88,6 @@ class Api {
       if (redirectURL != "") {
         loginResponse.redirectURL = redirectURL;
       }
-      if (loginResponse.status == LoginStatus.Scanned) {
-        print(1);
-      }
       return Future.value(loginResponse);
     } on Exception catch (e) {
       print(e);
@@ -98,7 +95,7 @@ class Api {
     }
   }
 
-  static Future<String> webWxLoginPage(String url) async {
+  static Future<WxKey> webWxLoginPage(String url) async {
     Response response;
     try {
       Map<String, String> header = new Map();
@@ -107,7 +104,13 @@ class Api {
 
       response = await _dio.get(url,
           options: Options(
-              headers: header, followRedirects: false, maxRedirects: 0));
+              receiveDataWhenStatusError: true,
+              headers: header,
+              validateStatus: (int status) {
+                return true;
+              },
+              followRedirects: false,
+              maxRedirects: 0));
       print(response.data);
     } on Exception catch (e) {
       print("exception: $e");
@@ -115,14 +118,20 @@ class Api {
 
     if (response != null) {
       final doc = XmlDocument.parse(response.data);
-      XmlElement el = doc.getElement("error");
-      print("ret = ${el.getAttribute("ret")}");
-      print("message = ${el.getAttribute("message")}");
-      print("skey = ${el.getAttribute("skey")}");
-      print("wxsid = ${el.getAttribute("wxsid")}");
-      print("wxuin = ${el.getAttribute("wxuin")}");
-      print("pass_ticket = ${el.getAttribute("pass_ticket")}");
-      print("isgrayscale = ${el.getAttribute("isgrayscale")}");
+
+      String findElement(String el) {
+        return doc.findElements("error").first.findElements(el).first.text;
+      }
+
+      var skey = findElement("skey");
+      var wxsid = findElement("wxsid");
+      var wxuin = findElement("wxuin");
+      var pass_ticket = findElement("pass_ticket");
+      var isgrayscale = findElement("isgrayscale");
+
+      return WxKey(skey, wxsid, wxuin, pass_ticket, isgrayscale);
     }
+
+    return null;
   }
 }
