@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'login.dart';
 import 'package:xml/xml.dart';
 import 'package:fwachat/model/wxkey.dart';
+import 'dart:convert';
 
 class Api {
   static const _baseURL = "https://login.weixin.qq.com";
@@ -133,5 +134,38 @@ class Api {
     }
 
     return null;
+  }
+
+  static Future<dynamic> getContacts(WxKey key) async {
+    Response response;
+
+    print(key.toString());
+    try {
+      String url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetcontact";
+
+      Map<String, String> header = new Map();
+      header["User-Agent"] =
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36";
+
+      Map<String, dynamic> data = new Map();
+      data["Uin"] = int.parse(key.wxuin);
+      data["Sid"] = key.wxsid;
+      data["Skey"] = key.skey;
+      data["DeviceID"] = "e609547902722302";
+
+      Map<String, dynamic> base = new Map();
+      base["BaseRequest"] = data;
+      String requestData = jsonEncode(base);
+
+      Map<String, dynamic> queryParam = new Map();
+      queryParam["pass_ticket"] = key.passTicket;
+      queryParam["skey"] = key.skey;
+
+      response =
+          await _dio.post(url, queryParameters: queryParam, data: requestData);
+      print(response.data);
+    } on Exception catch (e) {
+      print("exception: $e");
+    }
   }
 }

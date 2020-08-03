@@ -18,4 +18,10 @@ class UserNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void logout() {
+    Global.wxKey = null;
+    Global.removeWxKey();
+    notifyListeners();
+  }
 }

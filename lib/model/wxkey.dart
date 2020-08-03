@@ -38,4 +38,11 @@ class WxKey {
   factory WxKey.fromJson(Map<String, dynamic> json) => _$WxKeyFromJson(json);
 
   Map<String, dynamic> toJson() => _$WxKeyToJson(this);
+
+  @override
+  String toString() {
+    return 'WxKey{skey: $skey, wxsid: $wxsid, wxuin: $wxuin, passTicket: $passTicket, isgrayscale: $isgrayscale}';
+  }
+
+
 }

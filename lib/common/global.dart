@@ -33,4 +33,8 @@ class Global {
 
     _sp.setString(_wxKey, jsonEncode(wxKey.toJson()));
   }
+
+  static removeWxKey() async {
+    _sp.remove(_wxKey);
+  }
 }
